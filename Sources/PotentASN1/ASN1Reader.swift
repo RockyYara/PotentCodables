@@ -141,7 +141,16 @@ public class DERReader {
 
     case .generalizedTime:
       let string = try parseString(&itemBuffer, tag: tag, encoding: .ascii)
-      return .generalizedTime(generalizedFormatter.date(from: string)!)
+      
+      let dateFormatter: DateFormatter
+      
+      if string.contains(".") {
+        dateFormatter = generalizedFormatter
+      } else {
+        dateFormatter = generalizedFormatterWithoutMillis
+      }
+
+      return .generalizedTime(dateFormatter.date(from: string)!)
 
     case .graphicString:
       return .graphicString(try parseString(&itemBuffer, tag: tag, encoding: .ascii))
@@ -318,5 +327,15 @@ private let generalizedFormatter: DateFormatter = {
   formatter.locale = Locale(identifier: "en_US_POSIX")
   formatter.timeZone = TimeZone(secondsFromGMT: 0)
   formatter.dateFormat = "yyyyMMddHHmmss.SSSXXXXX"
+  return formatter
+}()
+
+
+private let generalizedFormatterWithoutMillis: DateFormatter = {
+  let formatter = DateFormatter()
+  formatter.calendar = Calendar(identifier: .iso8601)
+  formatter.locale = Locale(identifier: "en_US_POSIX")
+  formatter.timeZone = TimeZone(secondsFromGMT: 0)
+  formatter.dateFormat = "yyyyMMddHHmmssXXXXX"
   return formatter
 }()
