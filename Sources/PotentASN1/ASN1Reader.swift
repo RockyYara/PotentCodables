@@ -11,6 +11,7 @@
 import BigInt
 import Foundation
 import PotentCodables
+import CocoaLumberjack
 
 
 public enum DERReader {
@@ -144,9 +145,17 @@ public enum DERReader {
 
     case .utcTime:
       let string = try parseString(&itemBuffer, tag: tag, encoding: .ascii)
+        
+      DDLogDebug("string: \(string)")
+        
       guard let date = utcDateFormatter.date(from: string) else {
+        DDLogDebug("date is nil")
+          
         throw Error.invalidUTCTime
       }
+        
+      DDLogDebug("date: \(date)")
+
       return .utcTime(date)
 
     case .generalizedTime:
